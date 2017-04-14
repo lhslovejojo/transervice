@@ -1,12 +1,13 @@
 package com.smurfs.console.business.jbcc;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 
 public class TBCCustomizeOriginalPositionBean {
 	private String txID; // 交易ID ：GQS001_20170301001
-	private Double leftQuantity; // 资金剩余数量
+	private BigDecimal leftQuantity; // 资金剩余数量
 	private String txUnit; // 单位：吨、千克、克拉、桶、吨、加仑、升 立方米
-	private Double orderPrice; // 成交价格：100￥/吨
+	private BigDecimal orderPrice; // 成交价格：100￥/吨
 	private String memCode; // 资产所属账户
 	private String holdId; // 持仓单号
 	private String busiDatetime; //
@@ -31,14 +32,6 @@ public class TBCCustomizeOriginalPositionBean {
 
 	public void setTxUnit(String txUnit) {
 		this.txUnit = txUnit;
-	}
-
-	public Double getOrderPrice() {
-		return orderPrice;
-	}
-
-	public void setOrderPrice(Double orderPrice) {
-		this.orderPrice = orderPrice;
 	}
 
 	public String getMemCode() {
@@ -74,13 +67,7 @@ public class TBCCustomizeOriginalPositionBean {
 		this.productCode = productCode;
 	}
 
-	public Double getLeftQuantity() {
-		return leftQuantity;
-	}
 
-	public void setLeftQuantity(Double leftQuantity) {
-		this.leftQuantity = leftQuantity;
-	}
 
 	public String getHoldId() {
 		return holdId;
@@ -96,6 +83,22 @@ public class TBCCustomizeOriginalPositionBean {
 
 	public void setBusiDatetime(String busiDatetime) {
 		this.busiDatetime = busiDatetime;
+	}
+
+	public BigDecimal getLeftQuantity() {
+		return leftQuantity;
+	}
+
+	public void setLeftQuantity(BigDecimal leftQuantity) {
+		this.leftQuantity = leftQuantity;
+	}
+
+	public BigDecimal getOrderPrice() {
+		return orderPrice;
+	}
+
+	public void setOrderPrice(BigDecimal orderPrice) {
+		this.orderPrice = orderPrice;
 	}
 
 }

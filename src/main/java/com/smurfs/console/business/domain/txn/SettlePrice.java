@@ -1,6 +1,7 @@
 package com.smurfs.console.business.domain.txn;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * 结算价信息
@@ -18,7 +19,7 @@ public class SettlePrice implements Serializable {
 	private String productCategoryId;
 	private String productCode;
 	private String moneyType;
-	private Double settlePrice;
+	private BigDecimal settlePrice;
 
 	public String getInitDate() {
 		return initDate;
@@ -68,19 +69,20 @@ public class SettlePrice implements Serializable {
 		this.moneyType = moneyType;
 	}
 
-	public Double getSettlePrice() {
-		return settlePrice;
-	}
-
-	public void setSettlePrice(Double settlePrice) {
-		this.settlePrice = settlePrice;
-	}
 
 	@Override
 	public String toString() {
 		return "SettlePrice [initDate=" + initDate + ", exchangeId=" + exchangeId + ", exchangeMarketType="
 				+ exchangeMarketType + ", productCategoryId=" + productCategoryId + ", productCode=" + productCode
 				+ ", moneyType=" + moneyType + ", settlePrice=" + settlePrice + "]";
+	}
+
+	public BigDecimal getSettlePrice() {
+		return settlePrice;
+	}
+
+	public void setSettlePrice(BigDecimal settlePrice) {
+		this.settlePrice = settlePrice;
 	}
 
 }

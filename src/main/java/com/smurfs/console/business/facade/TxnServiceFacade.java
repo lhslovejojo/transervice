@@ -116,12 +116,12 @@ public class TxnServiceFacade implements TxnService {
 			HashMap<String, String> map = new HashMap<String, String>();
 			map.put("memCode", request.getMemCode());
 			// 根据商编更新滞纳金
-			if (request.getMemCode() != null && request.getDelayFees() != null && request.getDelayFees() > 0) {
+			if (request.getMemCode() != null && request.getDelayFees() != null && request.getDelayFees().doubleValue() > 0) {
 				map.put(Constants.DELAY_ACCOUNT_AMOUNT, request.getDelayFees().toString());
 			}
 			// 根据商编更新履约准备金
 			if (request.getMemCode() != null && request.getDepositBalance() != null
-					&& request.getDepositBalance() > 0) {
+					&& request.getDepositBalance().doubleValue() > 0) {
 				map.put(Constants.DEPOSIT_ACCOUNT_AMOUNT, request.getDepositBalance().toString());
 			}
 //			// 根据商编和产品编码更新资产结算价

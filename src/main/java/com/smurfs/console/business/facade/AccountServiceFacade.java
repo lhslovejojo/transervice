@@ -155,7 +155,7 @@ public class AccountServiceFacade implements AccountService {
 				map.put("accountID", request.getMemCode());
 				map.put(Constants.ASSET_ACCOUNT_PREFIX + request.getProductCode(), request.getQuantity().toString());
 				map.put(Constants.ASSET_ACCOUNT_PREFIX + request.getProductCode() + Constants.ASSET_HOLD_AMOUNT_SUFFIX,
-						String.valueOf(request.getQuantity() * request.getHoldPrice()));
+						String.valueOf(request.getQuantity().multiply(request.getHoldPrice())));
 				userInfService.updateAccountByMap(request.getMemCode(), map);
 			}
 		}

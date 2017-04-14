@@ -1,5 +1,6 @@
 package com.smurfs.console.business.dal.txn;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +84,7 @@ public class FundFlowDal {
 		fundFlow.setBusiTime("20170310111111");// 业务发生时间
 		// fundFlow.setProductType("00");// 产品分类
 		// fundFlow.setProductCode("TONG");// 产品编码
-		fundFlow.setOrderAmt(10d);
+		fundFlow.setOrderAmt(new BigDecimal(10));
 		fundFlow.setBusiType("FUNDTOKEOUT");// 业务类型 
 		fundFlow.setMemCode("0008");// 会员编码
 		// fundFlow.setFundAccountClear("11");// 资金账户
@@ -127,7 +128,7 @@ public class FundFlowDal {
 		if (flow.getOptType() == 1) {
 			tbcBean.setDealTotalPrice(flow.getOrderAmt());
 		} else {
-			tbcBean.setDealTotalPrice((-1) * flow.getOrderAmt());
+			tbcBean.setDealTotalPrice(new BigDecimal(-1).multiply(flow.getOrderAmt()));
 			tbcBean.setOpenPoundage(flow.getFeeAmt()); // 出金手续费
 		}
 		tbcBean.setTxTimestamp(flow.getBusiTime());
@@ -159,6 +160,7 @@ public class FundFlowDal {
 		TDBCQueryBean4OriginalTxBySingleCondition tqb = new TDBCQueryBean4OriginalTxBySingleCondition();
 		tqb.setIactTableName(JbccConstant.indexAccount);
 		tqb.setTbcTableName(JbccConstant.tbc);
+		tqb.setAbcTableName(JbccConstant.abc);
 		tqb.setAccountID(request.getMemCode());
 		tqb.setStartTS(DateUtil.getBeforeNowMonth(-3).getTime());
 		tqb.setEndTS(new Date().getTime());

@@ -9,6 +9,8 @@ public class TDBCQueryBean4OriginalTxBySingleCondition {
 
 	private String iactTableName;
 	private String tbcTableName;	
+	private String abcTableName;	
+	
 	private String accountID;
 	private long startTS;                   //开始时间
 	private long endTS;                    //结束时间
@@ -18,18 +20,6 @@ public class TDBCQueryBean4OriginalTxBySingleCondition {
 	private int pageIndex;
 	
 	
-	public int getPageSize() {
-		return pageSize;
-	}
-	public void setPageSize(int pageSize) {
-		this.pageSize = pageSize;
-	}
-	public int getPageIndex() {
-		return pageIndex;
-	}
-	public void setPageIndex(int pageIndex) {
-		this.pageIndex = pageIndex;
-	}
 	public String getIactTableName() {
 		return iactTableName;
 	}
@@ -41,6 +31,12 @@ public class TDBCQueryBean4OriginalTxBySingleCondition {
 	}
 	public void setTbcTableName(String tbcTableName) {
 		this.tbcTableName = tbcTableName;
+	}
+	public String getAbcTableName() {
+		return abcTableName;
+	}
+	public void setAbcTableName(String abcTableName) {
+		this.abcTableName = abcTableName;
 	}
 	public String getAccountID() {
 		return accountID;
@@ -72,5 +68,20 @@ public class TDBCQueryBean4OriginalTxBySingleCondition {
 	public void setValue(String value) {
 		this.value = value;
 	}
+	public int getPageSize() {
+		return pageSize;
+	}
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
+	public int getPageIndex() {
+		return pageIndex;
+	}
+	public void setPageIndex(int pageIndex) {
+		this.pageIndex = pageIndex;
+	}
+	
+	
+	
 	
 }

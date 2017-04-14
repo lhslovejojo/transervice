@@ -1,5 +1,6 @@
 package com.smurfs.console.business.domain.txn;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class ConCludeSheet {
@@ -27,16 +28,16 @@ public class ConCludeSheet {
 	private String oppDealType;
 	private String orderWay;
 	private String depositWay;
-	private Double orderPrice;
-	private Double holdPrice;
-	private Double orderQuantity;
-	private Double dealTotalPrice;
-	private Double depositRate;
+	private BigDecimal orderPrice;
+	private BigDecimal holdPrice;
+	private BigDecimal orderQuantity;
+	private BigDecimal dealTotalPrice;
+	private BigDecimal depositRate;
 	private String depositRatioType;
 	private String depositType;
-	private Double depositBalance;
-	private Double openPoundage;
-	private Double oppPoundage;
+	private BigDecimal depositBalance;
+	private BigDecimal openPoundage;
+	private BigDecimal oppPoundage;
 	private String depotOrderNo;
 	private String oppDepotOrderNo;
 	private String orderId;
@@ -46,6 +47,40 @@ public class ConCludeSheet {
 	/** 事件类型，事件ID，用于区分在区块链查询事件种类 */
 	private String eventType; // 事件类型
 	private String eventId; // 事件ID
+
+	@Override
+	public String toString() {
+		return "ConCludeSheet [id=" + id + ", requestTime=" + requestTime + ", requestId=" + requestId + ", busiNo="
+				+ busiNo + ", exchangeId=" + exchangeId + ", exchangeMarketType=" + exchangeMarketType + ", busiType="
+				+ busiType + ", memCode=" + memCode + ", fundAccountClear=" + fundAccountClear + ", openTradeAccount="
+				+ openTradeAccount + ", oppMemCode=" + oppMemCode + ", oppFundAccount=" + oppFundAccount
+				+ ", oppTradeAccount=" + oppTradeAccount + ", moneyType=" + moneyType + ", productCode=" + productCode
+				+ ", productCategoryId=" + productCategoryId + ", tradeType=" + tradeType + ", busiDate=" + busiDate
+				+ ", busiTime=" + busiTime + ", tradeDir=" + tradeDir + ", dealType=" + dealType + ", oppDealType="
+				+ oppDealType + ", orderWay=" + orderWay + ", depositWay=" + depositWay + ", orderPrice=" + orderPrice
+				+ ", holdPrice=" + holdPrice + ", orderQuantity=" + orderQuantity + ", dealTotalPrice=" + dealTotalPrice
+				+ ", depositRate=" + depositRate + ", depositRatioType=" + depositRatioType + ", depositType="
+				+ depositType + ", depositBalance=" + depositBalance + ", openPoundage=" + openPoundage
+				+ ", oppPoundage=" + oppPoundage + ", depotOrderNo=" + depotOrderNo + ", oppDepotOrderNo="
+				+ oppDepotOrderNo + ", orderId=" + orderId + ", oppOrderId=" + oppOrderId + ", settlementDate="
+				+ settlementDate + ", requestDesc=" + requestDesc + "]";
+	}
+
+	public String getEventType() {
+		return eventType;
+	}
+
+	public void setEventType(String eventType) {
+		this.eventType = eventType;
+	}
+
+	public String getEventId() {
+		return eventId;
+	}
+
+	public void setEventId(String eventId) {
+		this.eventId = eventId;
+	}
 
 	public Long getId() {
 		return id;
@@ -239,43 +274,43 @@ public class ConCludeSheet {
 		this.depositWay = depositWay;
 	}
 
-	public Double getOrderPrice() {
+	public BigDecimal getOrderPrice() {
 		return orderPrice;
 	}
 
-	public void setOrderPrice(Double orderPrice) {
+	public void setOrderPrice(BigDecimal orderPrice) {
 		this.orderPrice = orderPrice;
 	}
 
-	public Double getHoldPrice() {
+	public BigDecimal getHoldPrice() {
 		return holdPrice;
 	}
 
-	public void setHoldPrice(Double holdPrice) {
+	public void setHoldPrice(BigDecimal holdPrice) {
 		this.holdPrice = holdPrice;
 	}
 
-	public Double getOrderQuantity() {
+	public BigDecimal getOrderQuantity() {
 		return orderQuantity;
 	}
 
-	public void setOrderQuantity(Double orderQuantity) {
+	public void setOrderQuantity(BigDecimal orderQuantity) {
 		this.orderQuantity = orderQuantity;
 	}
 
-	public Double getDealTotalPrice() {
+	public BigDecimal getDealTotalPrice() {
 		return dealTotalPrice;
 	}
 
-	public void setDealTotalPrice(Double dealTotalPrice) {
+	public void setDealTotalPrice(BigDecimal dealTotalPrice) {
 		this.dealTotalPrice = dealTotalPrice;
 	}
 
-	public Double getDepositRate() {
+	public BigDecimal getDepositRate() {
 		return depositRate;
 	}
 
-	public void setDepositRate(Double depositRate) {
+	public void setDepositRate(BigDecimal depositRate) {
 		this.depositRate = depositRate;
 	}
 
@@ -295,27 +330,27 @@ public class ConCludeSheet {
 		this.depositType = depositType;
 	}
 
-	public Double getDepositBalance() {
+	public BigDecimal getDepositBalance() {
 		return depositBalance;
 	}
 
-	public void setDepositBalance(Double depositBalance) {
+	public void setDepositBalance(BigDecimal depositBalance) {
 		this.depositBalance = depositBalance;
 	}
 
-	public Double getOpenPoundage() {
+	public BigDecimal getOpenPoundage() {
 		return openPoundage;
 	}
 
-	public void setOpenPoundage(Double openPoundage) {
+	public void setOpenPoundage(BigDecimal openPoundage) {
 		this.openPoundage = openPoundage;
 	}
 
-	public Double getOppPoundage() {
+	public BigDecimal getOppPoundage() {
 		return oppPoundage;
 	}
 
-	public void setOppPoundage(Double oppPoundage) {
+	public void setOppPoundage(BigDecimal oppPoundage) {
 		this.oppPoundage = oppPoundage;
 	}
 
@@ -365,40 +400,6 @@ public class ConCludeSheet {
 
 	public void setRequestDesc(String requestDesc) {
 		this.requestDesc = requestDesc;
-	}
-
-	@Override
-	public String toString() {
-		return "ConCludeSheet [id=" + id + ", requestTime=" + requestTime + ", requestId=" + requestId + ", busiNo="
-				+ busiNo + ", exchangeId=" + exchangeId + ", exchangeMarketType=" + exchangeMarketType + ", busiType="
-				+ busiType + ", memCode=" + memCode + ", fundAccountClear=" + fundAccountClear + ", openTradeAccount="
-				+ openTradeAccount + ", oppMemCode=" + oppMemCode + ", oppFundAccount=" + oppFundAccount
-				+ ", oppTradeAccount=" + oppTradeAccount + ", moneyType=" + moneyType + ", productCode=" + productCode
-				+ ", productCategoryId=" + productCategoryId + ", tradeType=" + tradeType + ", busiDate=" + busiDate
-				+ ", busiTime=" + busiTime + ", tradeDir=" + tradeDir + ", dealType=" + dealType + ", oppDealType="
-				+ oppDealType + ", orderWay=" + orderWay + ", depositWay=" + depositWay + ", orderPrice=" + orderPrice
-				+ ", holdPrice=" + holdPrice + ", orderQuantity=" + orderQuantity + ", dealTotalPrice=" + dealTotalPrice
-				+ ", depositRate=" + depositRate + ", depositRatioType=" + depositRatioType + ", depositType="
-				+ depositType + ", depositBalance=" + depositBalance + ", openPoundage=" + openPoundage
-				+ ", oppPoundage=" + oppPoundage + ", depotOrderNo=" + depotOrderNo + ", oppDepotOrderNo="
-				+ oppDepotOrderNo + ", orderId=" + orderId + ", oppOrderId=" + oppOrderId + ", settlementDate="
-				+ settlementDate + ", requestDesc=" + requestDesc + "]";
-	}
-
-	public String getEventType() {
-		return eventType;
-	}
-
-	public void setEventType(String eventType) {
-		this.eventType = eventType;
-	}
-
-	public String getEventId() {
-		return eventId;
-	}
-
-	public void setEventId(String eventId) {
-		this.eventId = eventId;
 	}
 
 }

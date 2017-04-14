@@ -1,6 +1,10 @@
 package com.smurfs.console.business.jbcc;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.smurfs.console.constants.BusinessTypeEnum;
 import com.smurfs.console.constants.Constants;
@@ -11,8 +15,7 @@ import com.tiandetech.jbcc.sll.bean.ABCAtomicQuantifyBean;
  * 分解原始分离器，用于将原始交易分离为原子单方交易 涉及到三方：买方、卖方、平台
  */
 public class SplitTxUtils {
-
-	
+	public static Logger log = LoggerFactory.getLogger(SplitTxUtils.class);
 
 	/**
 	 * 成交 分解原始交易为原子单方交易，涉及到三方：买方、卖方、平台
@@ -38,99 +41,201 @@ public class SplitTxUtils {
 		ABCAtomicQuantifyBean platformFee = new ABCAtomicQuantifyBean(); // 交易平台方，收取交易费用
 
 		try {
-			// 1.购买方,资金交易
-			// 资金总和
-			selfAllFund.setAccountID(tob.getMemCode());
-			selfAllFund.setQuantifyName(Constants.FUND_ALL_RMB);
-			selfAllFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
-			selfAllFund.setAmount(-1 * (tob.getDealTotalPrice() + tob.getOpenPoundage())); // 购买商品方，资金为正数，同时需要缴纳平台费用
-			selfAllFund.setOrigialTxID(tob.getTxID());
-			selfAllFund.setDescription(tob.getTxDescription());
-			quantifyInfo.add(selfAllFund);
-			// 可用资金
-			selfAbleFund.setAccountID(tob.getMemCode());
-			selfAbleFund.setQuantifyName(Constants.FUND_ABLE_RMB);
-			selfAbleFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
-			selfAbleFund.setAmount(-1 * (tob.getDealTotalPrice() + tob.getOpenPoundage())); // 购买商品方，资金为正数，同时需要缴纳平台费用
-			selfAbleFund.setOrigialTxID(tob.getTxID());
-			selfAbleFund.setDescription(tob.getTxDescription());
-			quantifyInfo.add(selfAbleFund);
-			// 可提资金
-			selfTakeFund.setAccountID(tob.getMemCode());
-			selfTakeFund.setQuantifyName(Constants.FUND_TAKE_RMB);
-			selfTakeFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
-			selfTakeFund.setAmount(-1 * (tob.getDealTotalPrice() + tob.getOpenPoundage())); // 购买商品方，资金为正数，同时需要缴纳平台费用
-			selfTakeFund.setOrigialTxID(tob.getTxID());
-			selfTakeFund.setDescription(tob.getTxDescription());
-			quantifyInfo.add(selfTakeFund);
+			if ("1".equals(tob.getTxTradeDir())) {// 买方向的， 发起方为买方，参与方为卖方
 
-			// 2.购买方,单方资产交易
-			selfAsset.setAccountID(tob.getMemCode());
-			selfAsset.setQuantifyName(Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode());
-			selfAsset.setQuantifyType(BusinessTypeEnum.TRADE.toString());
-			selfAsset.setAmount(tob.getOrderQuantity()); // 购买商品方，资产为正数
-			selfAsset.setOrigialTxID(tob.getTxID());
-			selfAsset.setDescription(tob.getTxDescription());
-			quantifyInfo.add(selfAsset);
-			//购买方持仓成本 
-			selfAssetHold.setAccountID(tob.getMemCode());
-			selfAssetHold.setQuantifyName(Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode()+Constants.ASSET_HOLD_AMOUNT_SUFFIX);
-			selfAssetHold.setQuantifyType(BusinessTypeEnum.TRADE.toString());
-			selfAssetHold.setAmount(tob.getDealTotalPrice()); // 购买商品方，资产为正数
-			selfAssetHold.setOrigialTxID(tob.getTxID());
-			selfAssetHold.setDescription(tob.getTxDescription());
-			quantifyInfo.add(selfAssetHold);
+				// 1.购买方,资金交易
+				// 资金总和
+				selfAllFund.setAccountID(tob.getMemCode());
+				selfAllFund.setQuantifyName(Constants.FUND_ALL_RMB);
+				selfAllFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				selfAllFund.setAmount(new BigDecimal(-1).multiply(tob.getDealTotalPrice().add(tob.getOpenPoundage()))); // 购买商品方，资金为正数，同时需要缴纳平台费用
+				selfAllFund.setTxID(tob.getTxID());
+				selfAllFund.setDescription(tob.getTxDescription());
+				quantifyInfo.add(selfAllFund);
+				// 可用资金
+				selfAbleFund.setAccountID(tob.getMemCode());
+				selfAbleFund.setQuantifyName(Constants.FUND_ABLE_RMB);
+				selfAbleFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				selfAbleFund.setAmount(new BigDecimal(-1).multiply(tob.getDealTotalPrice().add(tob.getOpenPoundage()))); // 购买商品方，资金为正数，同时需要缴纳平台费用
+				selfAbleFund.setTxID(tob.getTxID());
+				selfAbleFund.setDescription(tob.getTxDescription());
+				quantifyInfo.add(selfAbleFund);
+				// 可提资金
+				selfTakeFund.setAccountID(tob.getMemCode());
+				selfTakeFund.setQuantifyName(Constants.FUND_TAKE_RMB);
+				selfTakeFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				selfTakeFund.setAmount(new BigDecimal(-1).multiply(tob.getDealTotalPrice().add(tob.getOpenPoundage()))); // 购买商品方，资金为正数，同时需要缴纳平台费用
+				selfTakeFund.setTxID(tob.getTxID());
+				selfTakeFund.setDescription(tob.getTxDescription());
+				quantifyInfo.add(selfTakeFund);
 
-			// 3.卖方,单方资金交易
-			peerAllFund.setAccountID(tob.getOppMemCode());
-			peerAllFund.setQuantifyName(Constants.FUND_ALL_RMB);
-			peerAllFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
-			peerAllFund.setAmount(tob.getDealTotalPrice() - tob.getOppPoundage()); // 出售商品方，资金为负数，同时需要缴纳平台费用
-			peerAllFund.setOrigialTxID(tob.getTxID());
-			peerAllFund.setDescription(tob.getTxDescription());
-			quantifyInfo.add(peerAllFund);
+				// 2.购买方,单方资产交易
+				selfAsset.setAccountID(tob.getMemCode());
+				selfAsset.setQuantifyName(Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode());
+				selfAsset.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				selfAsset.setAmount(tob.getOrderQuantity()); // 购买商品方，资产为正数
+				selfAsset.setTxID(tob.getTxID());
+				selfAsset.setDescription(tob.getTxDescription());
+				quantifyInfo.add(selfAsset);
+				// 购买方持仓成本
+				selfAssetHold.setAccountID(tob.getMemCode());
+				selfAssetHold.setQuantifyName(
+						Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode() + Constants.ASSET_HOLD_AMOUNT_SUFFIX);
+				selfAssetHold.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				selfAssetHold.setAmount(tob.getDealTotalPrice()); // 购买商品方，资产为正数
+				selfAssetHold.setTxID(tob.getTxID());
+				selfAssetHold.setDescription(tob.getTxDescription());
+				quantifyInfo.add(selfAssetHold);
 
-			peerAbleFund.setAccountID(tob.getOppMemCode());
-			peerAbleFund.setQuantifyName(Constants.FUND_ABLE_RMB);
-			peerAbleFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
-			peerAbleFund.setAmount(tob.getDealTotalPrice() - tob.getOppPoundage()); // 出售商品方，资金为负数，同时需要缴纳平台费用
-			peerAbleFund.setOrigialTxID(tob.getTxID());
-			peerAbleFund.setDescription(tob.getTxDescription());
-			quantifyInfo.add(peerAbleFund);
+				// 3.卖方,单方资金交易
+				peerAllFund.setAccountID(tob.getOppMemCode());
+				peerAllFund.setQuantifyName(Constants.FUND_ALL_RMB);
+				peerAllFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				peerAllFund.setAmount(tob.getDealTotalPrice().subtract(tob.getOppPoundage())); // 出售商品方，资金为负数，同时需要缴纳平台费用
+				peerAllFund.setTxID(tob.getTxID());
+				peerAllFund.setDescription(tob.getTxDescription());
+				quantifyInfo.add(peerAllFund);
 
-			peerTakeFund.setAccountID(tob.getOppMemCode());
-			peerTakeFund.setQuantifyName(Constants.FUND_TAKE_RMB);
-			peerTakeFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
-			peerTakeFund.setAmount(tob.getDealTotalPrice() - tob.getOppPoundage()); // 出售商品方，资金为负数，同时需要缴纳平台费用
-			peerTakeFund.setOrigialTxID(tob.getTxID());
-			peerTakeFund.setDescription(tob.getTxDescription());
-			quantifyInfo.add(peerTakeFund);
+				peerAbleFund.setAccountID(tob.getOppMemCode());
+				peerAbleFund.setQuantifyName(Constants.FUND_ABLE_RMB);
+				peerAbleFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				peerAbleFund.setAmount(tob.getDealTotalPrice().subtract(tob.getOppPoundage())); // 出售商品方，资金为负数，同时需要缴纳平台费用
+				peerAbleFund.setTxID(tob.getTxID());
+				peerAbleFund.setDescription(tob.getTxDescription());
+				quantifyInfo.add(peerAbleFund);
 
-			// 4.卖方,单方资产交易
-			peerAsset.setAccountID(tob.getOppMemCode());
-			peerAsset.setQuantifyName(Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode());
-			peerAsset.setQuantifyType(BusinessTypeEnum.TRADE.toString());
-			peerAsset.setAmount((-1) * tob.getOrderQuantity()); // 出售商品方，资产为负数
-			peerAsset.setOrigialTxID(tob.getTxID());
-			peerAsset.setDescription(tob.getTxDescription());
-			quantifyInfo.add(peerAsset);
-			
-			peerAssetHold.setAccountID(tob.getOppMemCode());
-			peerAssetHold.setQuantifyName(Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode()+Constants.ASSET_HOLD_AMOUNT_SUFFIX);
-			peerAssetHold.setQuantifyType(BusinessTypeEnum.TRADE.toString());
-			peerAssetHold.setAmount((-1) * tob.getDealTotalPrice()); // 出售商品方，资产为负数
-			peerAssetHold.setOrigialTxID(tob.getTxID());
-			peerAssetHold.setDescription(tob.getTxDescription());
-			quantifyInfo.add(peerAssetHold);
-			
-			// 5.缴纳平台费用，是由AB双方缴纳的平台费用之和
-			platformFee.setAccountID(tob.getTxFeePlatformAccountID());
-			platformFee.setQuantifyName(Constants.FUND_ALL_RMB);
-			platformFee.setQuantifyType(BusinessTypeEnum.TRADE.toString());
-			platformFee.setAmount(tob.getOpenPoundage() + tob.getOppPoundage()); // 交易发起方，AB双方缴纳平台费用的和
-			platformFee.setOrigialTxID(tob.getTxID());
-			platformFee.setDescription(tob.getTxDescription());
-			quantifyInfo.add(platformFee);
+				peerTakeFund.setAccountID(tob.getOppMemCode());
+				peerTakeFund.setQuantifyName(Constants.FUND_TAKE_RMB);
+				peerTakeFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				peerTakeFund.setAmount(tob.getDealTotalPrice().subtract(tob.getOppPoundage())); // 出售商品方，资金为负数，同时需要缴纳平台费用
+				peerTakeFund.setTxID(tob.getTxID());
+				peerTakeFund.setDescription(tob.getTxDescription());
+				quantifyInfo.add(peerTakeFund);
+
+				// 4.卖方,单方资产交易
+				peerAsset.setAccountID(tob.getOppMemCode());
+				peerAsset.setQuantifyName(Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode());
+				peerAsset.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				peerAsset.setAmount(new BigDecimal(-1).multiply(tob.getOrderQuantity())); // 出售商品方，资产为负数
+				peerAsset.setTxID(tob.getTxID());
+				peerAsset.setDescription(tob.getTxDescription());
+				quantifyInfo.add(peerAsset);
+
+				peerAssetHold.setAccountID(tob.getOppMemCode());
+				peerAssetHold.setQuantifyName(
+						Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode() + Constants.ASSET_HOLD_AMOUNT_SUFFIX);
+				peerAssetHold.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				peerAssetHold.setAmount(new BigDecimal(-1).multiply(tob.getDealTotalPrice())); // 出售商品方，资产为负数
+				peerAssetHold.setTxID(tob.getTxID());
+				peerAssetHold.setDescription(tob.getTxDescription());
+				quantifyInfo.add(peerAssetHold);
+
+				// 5.缴纳平台费用，是由AB双方缴纳的平台费用之和
+				platformFee.setAccountID(tob.getTxFeePlatformAccountID());
+				platformFee.setQuantifyName(Constants.FUND_ALL_RMB);
+				platformFee.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				platformFee.setAmount(tob.getOpenPoundage().add(tob.getOppPoundage())); // 交易发起方，AB双方缴纳平台费用的和
+				platformFee.setTxID(tob.getTxID());
+				platformFee.setDescription(tob.getTxDescription());
+				quantifyInfo.add(platformFee);
+			} else { // 卖方向的，发起方为卖方，参与方为买方
+				// 1.卖方,资金交易
+				// 资金总和
+				log.info("tob.getTxTradeDir():" + tob.getTxTradeDir());
+				selfAllFund.setAccountID(tob.getMemCode());
+				selfAllFund.setQuantifyName(Constants.FUND_ALL_RMB);
+				selfAllFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				selfAllFund.setAmount(tob.getDealTotalPrice().subtract(tob.getOpenPoundage())); // 卖方商品方，资金为正数，同时需要缴纳平台费用
+				selfAllFund.setTxID(tob.getTxID());
+				selfAllFund.setDescription(tob.getTxDescription());
+				quantifyInfo.add(selfAllFund);
+				// 可用资金
+				selfAbleFund.setAccountID(tob.getMemCode());
+				selfAbleFund.setQuantifyName(Constants.FUND_ABLE_RMB);
+				selfAbleFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				selfAbleFund.setAmount(tob.getDealTotalPrice().subtract(tob.getOpenPoundage())); // 卖方商品方，资金为正数，同时需要缴纳平台费用
+				selfAbleFund.setTxID(tob.getTxID());
+				selfAbleFund.setDescription(tob.getTxDescription());
+				quantifyInfo.add(selfAbleFund);
+				// 可提资金
+				selfTakeFund.setAccountID(tob.getMemCode());
+				selfTakeFund.setQuantifyName(Constants.FUND_TAKE_RMB);
+				selfTakeFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				selfTakeFund.setAmount(tob.getDealTotalPrice().subtract(tob.getOpenPoundage())); // 购买商品方，资金为正数，同时需要缴纳平台费用
+				selfTakeFund.setTxID(tob.getTxID());
+				selfTakeFund.setDescription(tob.getTxDescription());
+				quantifyInfo.add(selfTakeFund);
+
+				// 2.卖方,单方资产交易
+				selfAsset.setAccountID(tob.getMemCode());
+				selfAsset.setQuantifyName(Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode());
+				selfAsset.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				selfAsset.setAmount(new BigDecimal(-1).multiply(tob.getOrderQuantity())); // 卖方，资产为负数
+				selfAsset.setTxID(tob.getTxID());
+				selfAsset.setDescription(tob.getTxDescription());
+				quantifyInfo.add(selfAsset);
+				// 卖方持仓成本
+				selfAssetHold.setAccountID(tob.getMemCode());
+				selfAssetHold.setQuantifyName(
+						Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode() + Constants.ASSET_HOLD_AMOUNT_SUFFIX);
+				selfAssetHold.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				selfAssetHold.setAmount(new BigDecimal(-1).multiply(tob.getDealTotalPrice())); // 卖方，资产为负
+				selfAssetHold.setTxID(tob.getTxID());
+				selfAssetHold.setDescription(tob.getTxDescription());
+				quantifyInfo.add(selfAssetHold);
+
+				// 3.买方,单方资金交易
+				peerAllFund.setAccountID(tob.getOppMemCode());
+				peerAllFund.setQuantifyName(Constants.FUND_ALL_RMB);
+				peerAllFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				peerAllFund.setAmount(new BigDecimal(-1).multiply(tob.getDealTotalPrice().add(tob.getOppPoundage()))); // 买方，资金为负数，同时需要缴纳平台费用
+				peerAllFund.setTxID(tob.getTxID());
+				peerAllFund.setDescription(tob.getTxDescription());
+				quantifyInfo.add(peerAllFund);
+
+				peerAbleFund.setAccountID(tob.getOppMemCode());
+				peerAbleFund.setQuantifyName(Constants.FUND_ABLE_RMB);
+				peerAbleFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				peerAbleFund.setAmount(new BigDecimal(-1).multiply(tob.getDealTotalPrice().add(tob.getOppPoundage()))); // 买方，资金为负数，同时需要缴纳平台费用
+				peerAbleFund.setTxID(tob.getTxID());
+				peerAbleFund.setDescription(tob.getTxDescription());
+				quantifyInfo.add(peerAbleFund);
+
+				peerTakeFund.setAccountID(tob.getOppMemCode());
+				peerTakeFund.setQuantifyName(Constants.FUND_TAKE_RMB);
+				peerTakeFund.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				peerTakeFund.setAmount(new BigDecimal(-1).multiply(tob.getDealTotalPrice().add(tob.getOppPoundage()))); // 买方，资金为负数，同时需要缴纳平台费用
+				peerTakeFund.setTxID(tob.getTxID());
+				peerTakeFund.setDescription(tob.getTxDescription());
+				quantifyInfo.add(peerTakeFund);
+
+				// 4.买方,单方资产交易
+				peerAsset.setAccountID(tob.getOppMemCode());
+				peerAsset.setQuantifyName(Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode());
+				peerAsset.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				peerAsset.setAmount(tob.getOrderQuantity()); // 买方，资产为正数
+				peerAsset.setTxID(tob.getTxID());
+				peerAsset.setDescription(tob.getTxDescription());
+				quantifyInfo.add(peerAsset);
+
+				peerAssetHold.setAccountID(tob.getOppMemCode());
+				peerAssetHold.setQuantifyName(
+						Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode() + Constants.ASSET_HOLD_AMOUNT_SUFFIX);
+				peerAssetHold.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				peerAssetHold.setAmount(tob.getDealTotalPrice()); // 买方，资产为正数
+				peerAssetHold.setTxID(tob.getTxID());
+				peerAssetHold.setDescription(tob.getTxDescription());
+				quantifyInfo.add(peerAssetHold);
+
+				// 5.缴纳平台费用，是由AB双方缴纳的平台费用之和
+				platformFee.setAccountID(tob.getTxFeePlatformAccountID());
+				platformFee.setQuantifyName(Constants.FUND_ALL_RMB);
+				platformFee.setQuantifyType(BusinessTypeEnum.TRADE.toString());
+				platformFee.setAmount(tob.getOpenPoundage().add(tob.getOppPoundage())); // 交易发起方，AB双方缴纳平台费用的和
+				platformFee.setTxID(tob.getTxID());
+				platformFee.setDescription(tob.getTxDescription());
+				quantifyInfo.add(platformFee);
+			}
 
 			aab.setQuantifyInfo(quantifyInfo); // 分解原始交易为原子单方交易，涉及到三方：买方、卖方、平台
 		} catch (Exception ef) {
@@ -138,6 +243,7 @@ public class SplitTxUtils {
 		}
 
 		try {
+			tob.getNonquantifiableInfo().put("txID", tob.getTxID());
 			aab.setNonQuantifiableInfo(tob.getNonquantifiableInfo()); // 保存单方交易里的非量化信息
 		} catch (Exception ef) {
 			System.out.println("Please check whether the non-quantifiable information is complete?");
@@ -164,24 +270,24 @@ public class SplitTxUtils {
 			selfAllFund.setAccountID(tob.getMemCode());
 			selfAllFund.setQuantifyName(Constants.FUND_ALL_RMB); // 资金账户
 			selfAllFund.setQuantifyType(BusinessTypeEnum.ACCOUNT.toString());
-			selfAllFund.setAmount(0d); // 资金账户初始值
-			selfAllFund.setOrigialTxID(tob.getTxID());
+			selfAllFund.setAmount(new BigDecimal(0)); // 资金账户初始值
+			selfAllFund.setTxID(tob.getTxID());
 			selfAllFund.setDescription(tob.getTxDescription());
 			quantifyInfo.add(selfAllFund);
 			// 可用资金
 			selfAbleFund.setAccountID(tob.getMemCode());
 			selfAbleFund.setQuantifyName(Constants.FUND_ABLE_RMB);
 			selfAbleFund.setQuantifyType(BusinessTypeEnum.ACCOUNT.toString());
-			selfAbleFund.setAmount(0d);
-			selfAbleFund.setOrigialTxID(tob.getTxID());
+			selfAbleFund.setAmount(new BigDecimal(0));
+			selfAbleFund.setTxID(tob.getTxID());
 			selfAbleFund.setDescription(tob.getTxDescription());
 			quantifyInfo.add(selfAbleFund);
 			// 可提资金
 			selfTakeFund.setAccountID(tob.getMemCode());
 			selfTakeFund.setQuantifyName(Constants.FUND_TAKE_RMB);
 			selfTakeFund.setQuantifyType(BusinessTypeEnum.ACCOUNT.toString());
-			selfTakeFund.setAmount(0d);
-			selfTakeFund.setOrigialTxID(tob.getTxID());
+			selfTakeFund.setAmount(new BigDecimal(0));
+			selfTakeFund.setTxID(tob.getTxID());
 			selfTakeFund.setDescription(tob.getTxDescription());
 			quantifyInfo.add(selfTakeFund);
 
@@ -191,13 +297,14 @@ public class SplitTxUtils {
 		}
 
 		try {
+			tob.getNonquantifiableInfo().put("txID", tob.getTxID());
 			aab.setNonQuantifiableInfo(tob.getNonquantifiableInfo()); // 保存单方交易里的非量化信息
 		} catch (Exception ef) {
 			System.out.println("Please check whether the non-quantifiable information is complete?");
 		}
 		return aab;
 	}
-	
+
 	/**
 	 * 针对注册用户的拆分原子交易
 	 * 
@@ -207,6 +314,7 @@ public class SplitTxUtils {
 	public static ABCAtomicBean splitTxFromTBCOriginalToABCAtomicForSettlePrice(TBCCustomizeOriginalBean tob) {
 		ABCAtomicBean aab = new ABCAtomicBean();
 		try {
+			tob.getNonquantifiableInfo().put("txID", tob.getTxID());
 			aab.setNonQuantifiableInfo(tob.getNonquantifiableInfo()); // 保存单方交易里的非量化信息
 		} catch (Exception ef) {
 			System.out.println("Please check whether the non-quantifiable information is complete?");
@@ -232,7 +340,7 @@ public class SplitTxUtils {
 		ABCAtomicQuantifyBean platformFee = new ABCAtomicQuantifyBean(); // 交易发起方
 		try {
 			String busType = BusinessTypeEnum.FUND_IN.toString();
-			if (tob.getDealTotalPrice() != null && tob.getDealTotalPrice() < 0)
+			if (tob.getDealTotalPrice() != null && tob.getDealTotalPrice().doubleValue() < 0)
 				busType = BusinessTypeEnum.FUND_OUT.toString();
 			// 1.充值提现 ，单方资金交易
 			if (tob.getDealTotalPrice() != null) {
@@ -241,7 +349,7 @@ public class SplitTxUtils {
 				selfAllFund.setQuantifyName(Constants.FUND_ALL_RMB); // 资金账户
 				selfAllFund.setQuantifyType(busType);
 				selfAllFund.setAmount(tob.getDealTotalPrice()); // 资金账户初始值
-				selfAllFund.setOrigialTxID(tob.getTxID());
+				selfAllFund.setTxID(tob.getTxID());
 				selfAllFund.setDescription(tob.getTxDescription());
 				quantifyInfo.add(selfAllFund);
 				// 可用资金
@@ -249,7 +357,7 @@ public class SplitTxUtils {
 				selfAbleFund.setQuantifyName(Constants.FUND_ABLE_RMB);
 				selfAbleFund.setQuantifyType(busType);
 				selfAbleFund.setAmount(tob.getDealTotalPrice());
-				selfAbleFund.setOrigialTxID(tob.getTxID());
+				selfAbleFund.setTxID(tob.getTxID());
 				selfAbleFund.setDescription(tob.getTxDescription());
 				quantifyInfo.add(selfAbleFund);
 				// 可提资金
@@ -257,7 +365,7 @@ public class SplitTxUtils {
 				selfTakeFund.setQuantifyName(Constants.FUND_TAKE_RMB);
 				selfTakeFund.setQuantifyType(busType);
 				selfTakeFund.setAmount(tob.getDealTotalPrice());
-				selfTakeFund.setOrigialTxID(tob.getTxID());
+				selfTakeFund.setTxID(tob.getTxID());
 				selfTakeFund.setDescription(tob.getTxDescription());
 				quantifyInfo.add(selfTakeFund);
 			}
@@ -266,12 +374,12 @@ public class SplitTxUtils {
 				selfAsset.setAccountID(tob.getMemCode());
 				selfAsset.setQuantifyName(Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode());
 				selfAsset.setAmount(tob.getOrderQuantity());
-				if (tob.getOrderQuantity() > 0) {
-					selfAsset.setQuantifyType(BusinessTypeEnum.FUND_IN.toString()); //充资产
+				if (tob.getOrderQuantity().doubleValue() > 0) {
+					selfAsset.setQuantifyType(BusinessTypeEnum.FUND_IN.toString()); // 充资产
 				} else {
-					selfAsset.setQuantifyType(BusinessTypeEnum.FUND_OUT.toString()); //提出资产
+					selfAsset.setQuantifyType(BusinessTypeEnum.FUND_OUT.toString()); // 提出资产
 				}
-				selfAsset.setOrigialTxID(tob.getTxID());
+				selfAsset.setTxID(tob.getTxID());
 				selfAsset.setDescription(tob.getTxDescription());
 				quantifyInfo.add(selfAsset);
 			}
@@ -281,7 +389,7 @@ public class SplitTxUtils {
 				platformFee.setQuantifyName(Constants.FUND_ALL_RMB);
 				platformFee.setAmount(tob.getOpenPoundage()); // 提现的时候有平台手续费
 				platformFee.setQuantifyType(busType);
-				platformFee.setOrigialTxID(tob.getTxID());
+				platformFee.setTxID(tob.getTxID());
 				platformFee.setDescription(tob.getTxDescription());
 				quantifyInfo.add(selfAsset);
 			}
@@ -291,6 +399,7 @@ public class SplitTxUtils {
 		}
 
 		try {
+			tob.getNonquantifiableInfo().put("txID", tob.getTxID());
 			aab.setNonQuantifiableInfo(tob.getNonquantifiableInfo()); // 保存单方交易里的非量化信息
 		} catch (Exception ef) {
 			System.out.println("Please check whether the non-quantifiable information is complete?");
@@ -321,24 +430,24 @@ public class SplitTxUtils {
 			selfAllFund.setAccountID(tob.getMemCode());
 			selfAllFund.setQuantifyName(Constants.FUND_ALL_RMB);
 			selfAllFund.setQuantifyType(BusinessTypeEnum.TRANSFER.toString());
-			selfAllFund.setAmount(-1 * tob.getDealTotalPrice()); // 购买商品方，资金为正数，同时需要缴纳平台费用
-			selfAllFund.setOrigialTxID(tob.getTxID());
+			selfAllFund.setAmount(new BigDecimal(-1).multiply(tob.getDealTotalPrice())); // 购买商品方，资金为正数，同时需要缴纳平台费用
+			selfAllFund.setTxID(tob.getTxID());
 			selfAllFund.setDescription(tob.getTxDescription());
 			quantifyInfo.add(selfAllFund);
 			// 可用资金
 			selfAbleFund.setAccountID(tob.getMemCode());
 			selfAbleFund.setQuantifyName(Constants.FUND_ABLE_RMB);
 			selfAbleFund.setQuantifyType(BusinessTypeEnum.TRANSFER.toString());
-			selfAbleFund.setAmount(-1 * tob.getDealTotalPrice()); // 购买商品方，资金为正数，同时需要缴纳平台费用
-			selfAbleFund.setOrigialTxID(tob.getTxID());
+			selfAbleFund.setAmount(new BigDecimal(-1).multiply(tob.getDealTotalPrice())); // 购买商品方，资金为正数，同时需要缴纳平台费用
+			selfAbleFund.setTxID(tob.getTxID());
 			selfAbleFund.setDescription(tob.getTxDescription());
 			quantifyInfo.add(selfAbleFund);
 			// 可提资金
 			selfTakeFund.setAccountID(tob.getMemCode());
 			selfTakeFund.setQuantifyName(Constants.FUND_TAKE_RMB);
 			selfTakeFund.setQuantifyType(BusinessTypeEnum.TRANSFER.toString());
-			selfTakeFund.setAmount(-1 * tob.getDealTotalPrice()); // 购买商品方，资金为正数，同时需要缴纳平台费用
-			selfTakeFund.setOrigialTxID(tob.getTxID());
+			selfTakeFund.setAmount(new BigDecimal(-1).multiply(tob.getDealTotalPrice())); // 购买商品方，资金为正数，同时需要缴纳平台费用
+			selfTakeFund.setTxID(tob.getTxID());
 			selfTakeFund.setDescription(tob.getTxDescription());
 			quantifyInfo.add(selfTakeFund);
 
@@ -348,7 +457,7 @@ public class SplitTxUtils {
 			peerAllFund.setQuantifyName(Constants.FUND_ALL_RMB);
 			peerAllFund.setQuantifyType(BusinessTypeEnum.TRANSFER.toString());
 			peerAllFund.setAmount(tob.getDealTotalPrice()); // 出售商品方，资金为负数，同时需要缴纳平台费用
-			peerAllFund.setOrigialTxID(tob.getTxID());
+			peerAllFund.setTxID(tob.getTxID());
 			peerAllFund.setDescription(tob.getTxDescription());
 			quantifyInfo.add(peerAllFund);
 			// 可用资金
@@ -356,7 +465,7 @@ public class SplitTxUtils {
 			peerAbleFund.setQuantifyName(Constants.FUND_ABLE_RMB);
 			peerAbleFund.setQuantifyType(BusinessTypeEnum.TRANSFER.toString());
 			peerAbleFund.setAmount(tob.getDealTotalPrice()); // 出售商品方，资金为负数，同时需要缴纳平台费用
-			peerAbleFund.setOrigialTxID(tob.getTxID());
+			peerAbleFund.setTxID(tob.getTxID());
 			peerAbleFund.setDescription(tob.getTxDescription());
 			quantifyInfo.add(peerAbleFund);
 			// 可提资金
@@ -364,7 +473,7 @@ public class SplitTxUtils {
 			peerTakeFund.setQuantifyName(Constants.FUND_TAKE_RMB);
 			peerTakeFund.setQuantifyType(BusinessTypeEnum.TRANSFER.toString());
 			peerTakeFund.setAmount(tob.getDealTotalPrice()); // 出售商品方，资金为负数，同时需要缴纳平台费用
-			peerTakeFund.setOrigialTxID(tob.getTxID());
+			peerTakeFund.setTxID(tob.getTxID());
 			peerTakeFund.setDescription(tob.getTxDescription());
 			quantifyInfo.add(peerTakeFund);
 
@@ -374,12 +483,14 @@ public class SplitTxUtils {
 		}
 
 		try {
+			tob.getNonquantifiableInfo().put("txID", tob.getTxID());
 			aab.setNonQuantifiableInfo(tob.getNonquantifiableInfo()); // 保存单方交易里的非量化信息
 		} catch (Exception ef) {
 			System.out.println("Please check whether the non-quantifiable information is complete?");
 		}
 		return aab;
 	}
+
 	/**
 	 * 分解 持仓信息
 	 * 
@@ -399,7 +510,7 @@ public class SplitTxUtils {
 			selfAsset.setQuantifyName(Constants.ASSET_ACCOUNT_PREFIX + tob.getProductCode());
 			selfAsset.setQuantifyType(BusinessTypeEnum.POSITION.toString());
 			selfAsset.setAmount(tob.getLeftQuantity()); // 购买商品方，资金为正数，同时需要缴纳平台费用
-			selfAsset.setOrigialTxID(tob.getTxID());
+			selfAsset.setTxID(tob.getTxID());
 			selfAsset.setDescription(tob.getTxDescription());
 			quantifyInfo.add(selfAsset);
 			aab.setQuantifyInfo(quantifyInfo);
@@ -408,121 +519,7 @@ public class SplitTxUtils {
 		}
 
 		try {
-			aab.setNonQuantifiableInfo(tob.getNonquantifiableInfo()); // 保存单方交易里的非量化信息
-		} catch (Exception ef) {
-			System.out.println("Please check whether the non-quantifiable information is complete?");
-		}
-		return aab;
-	}
-
-	/**
-	 * 用于交易金额和可用金额 变动不同的时候 ，暂没有用
-	 * 
-	 * @param tob
-	 * @return
-	 */
-	public static ABCAtomicBean splitTxFromTBCOriginalToABCAtomic(TBCCustomizeOriginalBean tob) {
-		ABCAtomicBean aab = new ABCAtomicBean();
-
-		// 分解交易双方和中介方，共3方交易,拆解成6笔单方交易
-		ArrayList<ABCAtomicQuantifyBean> quantifyInfo = new ArrayList<ABCAtomicQuantifyBean>();
-		ABCAtomicQuantifyBean selfFund = new ABCAtomicQuantifyBean(); // 交易发起方
-																		// ：可用资金
-		ABCAtomicQuantifyBean selfLockFund = new ABCAtomicQuantifyBean(); // 交易发起方
-																			// ：
-																			// 锁定资金
-		ABCAtomicQuantifyBean selfAllFund = new ABCAtomicQuantifyBean(); // 交易发起方
-																			// ：
-																			// 全部资金
-
-		ABCAtomicQuantifyBean selfAsset = new ABCAtomicQuantifyBean(); // 交易发起方
-		ABCAtomicQuantifyBean peerFund = new ABCAtomicQuantifyBean(); // 交易参与方：可用资金
-		ABCAtomicQuantifyBean peerLockFund = new ABCAtomicQuantifyBean(); // 交易参与方：
-																			// 锁定资金
-		ABCAtomicQuantifyBean peerAllFund = new ABCAtomicQuantifyBean(); // 交易参与方：
-																			// 全部资金
-
-		ABCAtomicQuantifyBean peerAsset = new ABCAtomicQuantifyBean(); // 交易参与方
-		ABCAtomicQuantifyBean platformFee = new ABCAtomicQuantifyBean(); // 交易平台方，收取交易费用
-
-		try {
-			// 1.交易发起方,单方资金交易
-			selfFund.setAccountID(tob.getMemCode());
-			selfFund.setQuantifyName("Constants.FUND_RMB"); // 可用资金
-			selfFund.setAmount(tob.getTxFundAmount() - tob.getOpenPoundage()); // 购买商品方，资金为负数，同时需要缴纳平台费用
-			selfFund.setOrigialTxID(tob.getTxID());
-			selfFund.setDescription(tob.getTxDescription());
-
-			selfLockFund.setAccountID(tob.getMemCode());
-			selfLockFund.setQuantifyName("Constants.FUND_LOCK_RMB"); // 锁定资金
-			selfLockFund.setAmount(tob.getTxFundLockAmount() - tob.getOpenPoundage()); // 购买商品方，资金为负数，同时需要缴纳平台费用
-			selfLockFund.setOrigialTxID(tob.getTxID());
-			selfLockFund.setDescription(tob.getTxDescription());
-
-			selfAllFund.setAccountID(tob.getMemCode());
-			selfAllFund.setQuantifyName("Constants.FUND_ALL_RMB"); // 全部资金
-			selfAllFund.setAmount(tob.getDealTotalPrice() - tob.getOpenPoundage()); // 购买商品方，资金为负数，同时需要缴纳平台费用
-			selfAllFund.setOrigialTxID(tob.getTxID());
-			selfAllFund.setDescription(tob.getTxDescription());
-
-			// 2.交易发起方,单方资产交易
-			selfAsset.setAccountID(tob.getMemCode());
-			selfAsset.setQuantifyName(tob.getProductCode()); // 资产商品编码
-			selfAsset.setAmount(tob.getOrderQuantity()); // 购买商品方，资产为正数
-			selfAsset.setOrigialTxID(tob.getTxID());
-			selfAsset.setDescription(tob.getTxDescription());
-
-			// 3.交易参与方,单方资金交易
-			peerFund.setAccountID(tob.getOppMemCode());
-			peerFund.setQuantifyName("Constants.FUND_RMB");
-			peerFund.setAmount((-1) * tob.getTxFundAmount() - tob.getOppPoundage()); // 出售商品方，资金为正数，同时需要缴纳平台费用
-			peerFund.setOrigialTxID(tob.getTxID());
-			peerFund.setDescription(tob.getTxDescription());
-
-			peerLockFund.setAccountID(tob.getOppMemCode());
-			peerLockFund.setQuantifyName("Constants.FUND_LOCK_RMB");
-			peerLockFund.setAmount((-1) * tob.getTxFundLockAmount() - tob.getOppPoundage()); // 出售商品方，资金为正数，同时需要缴纳平台费用
-			peerLockFund.setOrigialTxID(tob.getTxID());
-			peerLockFund.setDescription(tob.getTxDescription());
-
-			peerAllFund.setAccountID(tob.getOppMemCode());
-			peerAllFund.setQuantifyName("Constants.FUND_ALL_RMB");
-			peerAllFund.setAmount((-1) * tob.getDealTotalPrice() - tob.getOppPoundage()); // 出售商品方，资金为正数，同时需要缴纳平台费用
-			peerAllFund.setOrigialTxID(tob.getTxID());
-			peerAllFund.setDescription(tob.getTxDescription());
-
-			// 4.交易参与方,单方资产交易
-			peerAsset.setAccountID(tob.getOppMemCode());
-			peerAsset.setQuantifyName(tob.getProductCode());
-			peerAsset.setAmount((-1) * tob.getOrderQuantity()); // 出售商品方，资产为负数
-			peerAsset.setOrigialTxID(tob.getTxID());
-			peerAsset.setDescription(tob.getTxDescription());
-
-			// 5.缴纳平台费用，是由AB双方缴纳的平台费用之和
-			platformFee.setAccountID(tob.getTxFeePlatformAccountID());
-			platformFee.setQuantifyName("Constants.FUND_RMB");
-			platformFee.setAmount(tob.getOpenPoundage() + tob.getOppPoundage()); // 交易发起方，AB双方缴纳平台费用的和
-			platformFee.setOrigialTxID(tob.getTxID());
-			platformFee.setDescription(tob.getTxDescription());
-
-			quantifyInfo.add(selfFund);
-			quantifyInfo.add(selfLockFund);
-			quantifyInfo.add(selfAllFund);
-
-			quantifyInfo.add(selfAsset);
-			quantifyInfo.add(peerFund);
-			quantifyInfo.add(peerLockFund);
-			quantifyInfo.add(peerAllFund);
-
-			quantifyInfo.add(peerAsset);
-			quantifyInfo.add(platformFee);
-
-			aab.setQuantifyInfo(quantifyInfo); // 分解原始交易为原子单方交易，涉及到三方：买方、卖方、平台
-		} catch (Exception ef) {
-			System.out.println("Please check whether the quantification information is complete?");
-		}
-
-		try {
+			tob.getNonquantifiableInfo().put("txID", tob.getTxID());
 			aab.setNonQuantifiableInfo(tob.getNonquantifiableInfo()); // 保存单方交易里的非量化信息
 		} catch (Exception ef) {
 			System.out.println("Please check whether the non-quantifiable information is complete?");

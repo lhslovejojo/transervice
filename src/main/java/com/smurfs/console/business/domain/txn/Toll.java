@@ -1,5 +1,6 @@
 package com.smurfs.console.business.domain.txn;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -24,7 +25,7 @@ public class Toll {
 	/** 收费类型 */
 	private String exchangeFeesType;
 	/** 收费金额 */
-	private Double feesBalance;
+	private BigDecimal feesBalance;
 	/** 付费会员编码（交易所内部） */
 	private String payerMemCode;
 	/** 付款资金账号（交易所会员签约账号） */
@@ -303,14 +304,6 @@ public class Toll {
 				+ "]";
 	}
 
-	public Double getFeesBalance() {
-		return feesBalance;
-	}
-
-	public void setFeesBalance(Double feesBalance) {
-		this.feesBalance = feesBalance;
-	}
-
 	public String getEventType() {
 		return eventType;
 	}
@@ -325,6 +318,14 @@ public class Toll {
 
 	public void setEventId(String eventId) {
 		this.eventId = eventId;
+	}
+
+	public BigDecimal getFeesBalance() {
+		return feesBalance;
+	}
+
+	public void setFeesBalance(BigDecimal feesBalance) {
+		this.feesBalance = feesBalance;
 	}
 
 }

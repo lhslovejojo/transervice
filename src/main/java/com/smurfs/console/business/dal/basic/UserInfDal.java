@@ -116,7 +116,7 @@ public class UserInfDal {
 	 */
 	public boolean updateAccountByMap(String memCode, HashMap<String, String> map) {
 		TBCCustomizeOriginalBean tbcBean = new TBCCustomizeOriginalBean();
-		tbcBean.setTxID("USER_" + System.currentTimeMillis());
+		tbcBean.setTxID("USER_" + memCode+System.currentTimeMillis());
 		tbcBean.setMemCode(memCode);
 		map.put("accountID", memCode);
 		tbcBean.setNonquantifiableInfo(map);

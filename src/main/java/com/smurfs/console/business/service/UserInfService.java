@@ -1,5 +1,6 @@
 package com.smurfs.console.business.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -107,9 +108,10 @@ public class UserInfService {
 					JSONObject ob = (JSONObject) it.next();
 					UserResponse user = BeanCopyUtil.cvtDozer(ob, UserResponse.class);
 					BalanceResponse balanceResponse = new BalanceResponse();
-					balanceResponse.setAbleBal(NumberUtil.getDoubleFromStr(ob.getString(Constants.FUND_ABLE_RMB)));
-					balanceResponse.setTotalBal(NumberUtil.getDoubleFromStr(ob.getString(Constants.FUND_ALL_RMB)));
-					balanceResponse.setAdvanceBal(NumberUtil.getDoubleFromStr(ob.getString(Constants.FUND_TAKE_RMB)));
+					balanceResponse.setAbleBal(NumberUtil.getBigDecimalFromStr(ob.getString(Constants.FUND_ABLE_RMB)));
+					balanceResponse.setTotalBal(NumberUtil.getBigDecimalFromStr(ob.getString(Constants.FUND_ALL_RMB)));
+					balanceResponse
+							.setAdvanceBal(NumberUtil.getBigDecimalFromStr(ob.getString(Constants.FUND_TAKE_RMB)));
 					balanceResponse.setFundAccount(user.getTradeAccount());
 					balanceResponse.setExchangeFundAccount(user.getExchangeFundAccount());
 					balanceResponse.setExchangeId(user.getExchangeId());
@@ -137,12 +139,24 @@ public class UserInfService {
 		DozerBeanMapper mapper = new DozerBeanMapper();
 		UserResponse user = mapper.map(map, UserResponse.class);
 		BalanceResponse balanceResponse = new BalanceResponse();
-		balanceResponse.setAbleBal(
-				NumberUtil.getDoubleFromStr(jsonMap.get(Constants.FUND_ABLE_RMB).values().iterator().next()));
-		balanceResponse.setTotalBal(
-				NumberUtil.getDoubleFromStr(jsonMap.get(Constants.FUND_ALL_RMB).values().iterator().next()));
-		balanceResponse.setAdvanceBal(
-				NumberUtil.getDoubleFromStr(jsonMap.get(Constants.FUND_TAKE_RMB).values().iterator().next()));
+		if (jsonMap.get(Constants.FUND_ABLE_RMB) != null) {
+			balanceResponse.setAbleBal(
+					NumberUtil.getBigDecimalFromStr(jsonMap.get(Constants.FUND_ABLE_RMB).values().iterator().next()));
+		} else {
+			balanceResponse.setAbleBal(new BigDecimal(0));
+		}
+		if (jsonMap.get(Constants.FUND_ALL_RMB) != null) {
+			balanceResponse.setTotalBal(
+					NumberUtil.getBigDecimalFromStr(jsonMap.get(Constants.FUND_ALL_RMB).values().iterator().next()));
+		} else {
+			balanceResponse.setTotalBal(new BigDecimal(0));
+		}
+		if (jsonMap.get(Constants.FUND_TAKE_RMB) != null) {
+			balanceResponse.setAdvanceBal(
+					NumberUtil.getBigDecimalFromStr(jsonMap.get(Constants.FUND_TAKE_RMB).values().iterator().next()));
+		} else {
+			balanceResponse.setAdvanceBal(new BigDecimal(0));
+		}
 		balanceResponse.setFundAccount(user.getTradeAccount());
 		user.setBalanceResponse(balanceResponse);
 		return user;
@@ -186,9 +200,10 @@ public class UserInfService {
 			response = JSON.parseObject(jsonMsg, UserResponse.class);
 			JSONObject jsonObject = JSON.parseObject(jsonMsg);
 			BalanceResponse balanceResponse = new BalanceResponse();
-			balanceResponse.setAbleBal(NumberUtil.getDoubleFromStr(jsonObject.getString(Constants.FUND_ABLE_RMB)));
-			balanceResponse.setTotalBal(NumberUtil.getDoubleFromStr(jsonObject.getString(Constants.FUND_ALL_RMB)));
-			balanceResponse.setAdvanceBal(NumberUtil.getDoubleFromStr(jsonObject.getString(Constants.FUND_TAKE_RMB)));
+			balanceResponse.setAbleBal(NumberUtil.getBigDecimalFromStr(jsonObject.getString(Constants.FUND_ABLE_RMB)));
+			balanceResponse.setTotalBal(NumberUtil.getBigDecimalFromStr(jsonObject.getString(Constants.FUND_ALL_RMB)));
+			balanceResponse
+					.setAdvanceBal(NumberUtil.getBigDecimalFromStr(jsonObject.getString(Constants.FUND_TAKE_RMB)));
 			balanceResponse.setFundAccount(jsonObject.getString("tradeAccount"));
 			response.setBalanceResponse(balanceResponse);
 		}
@@ -226,13 +241,14 @@ public class UserInfService {
 					String proCode = key.substring(Constants.ASSET_ACCOUNT_PREFIX.length());
 					position.setProductCode(proCode);
 					position.setFundAccountClear(user.getFundAccountClear());
-					position.setHoldQuantity(NumberUtil.getDoubleFromStr(map.get(key)));
+					position.setHoldQuantity(NumberUtil.getBigDecimalFromStr(map.get(key)));
 					position.setHoldPrice(
-							NumberUtil.getDoubleFromStr(map.get(key + Constants.ASSET_HOLD_AMOUNT_SUFFIX)));
+							NumberUtil.getBigDecimalFromStr(map.get(key + Constants.ASSET_HOLD_AMOUNT_SUFFIX)));
 					position.setMemCodeClear(user.getMemCodeClear());
 					position.setMemCode(user.getMemCode());
 					position.setMarketPrice(settlePriceService.getLastSettlePrice(proCode));
-					position.setMarketValue(NumberUtil.getDoubleFromStr(map.get(key)) * position.getMarketPrice());
+					position.setMarketValue(
+							NumberUtil.getBigDecimalFromStr(map.get(key)).multiply(position.getMarketPrice()));
 					list.add(position);
 				}
 			}
@@ -268,13 +284,13 @@ public class UserInfService {
 						PositionResponse position = new PositionResponse();
 						position.setProductCode(proCode);
 						position.setFundAccountClear(user.getFundAccountClear());
-						position.setHoldQuantity(NumberUtil.getDoubleFromStr(assetNumMap.get(assetNumKey)));
-						position.setHoldPrice(NumberUtil.getDoubleFromStr(assetAmountMap.get(assetNumKey)));
+						position.setHoldQuantity(NumberUtil.getBigDecimalFromStr(assetNumMap.get(assetNumKey)));
+						position.setHoldPrice(NumberUtil.getBigDecimalFromStr(assetAmountMap.get(assetNumKey)));
 						position.setMemCodeClear(user.getMemCodeClear());
 						position.setMemCode(user.getMemCode());
 						position.setMarketPrice(settlePriceService.getLastSettlePrice(productCode));
-						position.setMarketValue(NumberUtil.getDoubleFromStr(assetNumMap.get(assetNumKey))
-								* settlePriceService.getLastSettlePrice(productCode));
+						position.setMarketValue(NumberUtil.getBigDecimalFromStr(assetNumMap.get(assetNumKey))
+								.multiply(settlePriceService.getLastSettlePrice(productCode)));
 						position.setChangeTime(
 								DateUtil.DateToString(new Date(Long.parseLong(assetNumKey)), "yyyy-MM-dd HH:mm:ss"));
 						list.add(position);

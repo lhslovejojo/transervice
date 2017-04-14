@@ -103,6 +103,7 @@ public class ConCludeSheepDal {
 		tbcBean.setOrderPrice(sheep.getOrderPrice()); // 成交单价
 		tbcBean.setOrderQuantity(sheep.getOrderQuantity()); // 资产成交数量
 		tbcBean.setTxDescription(sheep.getRequestDesc()); // 交易描述
+		tbcBean.setTxTradeDir(sheep.getTradeDir());
 		tbcBean.setProductCode(sheep.getProductCode());
 		tbcBean.setTxFeePlatformAccountID(sheep.getExchangeId());
 		tbcBean.setTxTimestamp(sheep.getBusiTime());
@@ -139,6 +140,7 @@ public class ConCludeSheepDal {
 		TDBCQueryBean4OriginalTxBySingleCondition tqb = new TDBCQueryBean4OriginalTxBySingleCondition();
 		tqb.setIactTableName(JbccConstant.indexAccount);
 		tqb.setTbcTableName(JbccConstant.tbc);
+		tqb.setAbcTableName(JbccConstant.abc);
 		tqb.setAccountID(request.getMemCode());
 		tqb.setStartTS(DateUtil.getBeforeNowMonth(-3).getTime());
 		tqb.setEndTS(new Date().getTime());
